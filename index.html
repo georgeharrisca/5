@@ -46,7 +46,7 @@
   <script>
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
-     { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/346621424a4f6a228688adc71a6b48aac4c37b78/tbm.mxl' },
+      { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/346621424a4f6a228688adc71a6b48aac4c37b78/tbm.mxl' },
       // Add more files as needed
     ];
 
@@ -151,8 +151,9 @@
       const xmlString = new XMLSerializer().serializeToString(xmlDoc);
       const xmlBlob = new Blob([xmlString], { type: "application/xml" });
 
-      // Directly return the zipped data from fflate
-      return fflate.zipSync([["part.xml", xmlBlob]]);
+      // Use fflate to create the zip, directly returning the data
+      const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
+      return zipData;
     }
 
     // Display part information
