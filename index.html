@@ -49,6 +49,7 @@
   <script>
     let partInfo = [];
 
+    // List of MXL files (replace with your actual GitHub URLs)
     const files = [
       { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
     ];
@@ -87,8 +88,8 @@
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
         const containerPath = Object.keys(zip).find(p => {
-          console.log("Checking path:", p); 
-          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
+          console.log("Checking path:", p); // Log each file path inside the zip
+          return typeof p === 'string' && p.toLowerCase && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
         if (!containerPath) {
@@ -133,8 +134,8 @@
         const id = part.getAttribute("id");
         const nameNode = part.getElementsByTagName("part-name")[0];
         const name = nameNode ? nameNode.textContent : "(no name)";
-        
-        const partXML = part.outerHTML;
+
+        const partXML = part.outerHTML; // Use the outerHTML for the full part XML
         partInfo.push({ id, name, xml: partXML });
       }
 
@@ -194,15 +195,13 @@
 
         const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
 
-        // Use fflate to create a zip file (MXL format)
         const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
 
-        // Create a Blob URL and trigger the download as an .mxl file
         const partBlob = new Blob([zipData], { type: "application/zip" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`; // Save as .mxl
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // This ensures the part is downloaded in MXL format
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -215,6 +214,7 @@
     document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
     document.getElementById("downloadFileButton").addEventListener("click", downloadFile);
     document.getElementById("downloadPartButton").addEventListener("click", downloadSelectedPart);
+
   </script>
 </body>
 </html>
