@@ -149,11 +149,12 @@
         const partNameStart = partXML.indexOf('<part-name>');
         const partNameEnd = partXML.indexOf('</part-name>');
 
+        // Log the exact content between <part-name> tags
         if (partNameStart !== -1 && partNameEnd !== -1) {
           const partName = partXML.slice(partNameStart + 11, partNameEnd).trim(); // Extract part name between <part-name> tags
           console.log("Manually Extracted Part Name:", partName);
         } else {
-          console.log("No part name found");
+          console.log("No part name found in this part.");
         }
 
         const partName = partNameStart !== -1 && partNameEnd !== -1 ? partXML.slice(partNameStart + 11, partNameEnd).trim() : "(no name)";
