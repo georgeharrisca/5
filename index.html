@@ -188,7 +188,7 @@
       });
     }
 
-  // Function to download the selected part
+// Function to download the selected part
 async function downloadSelectedPart() {
   const selectedPartId = document.getElementById("partSelect").value;
   if (!selectedPartId) {
@@ -221,8 +221,14 @@ async function downloadSelectedPart() {
       return;
     }
 
-    // Create a MXL zip from the part's XML string
-    const zipData = createMXLZip(partXMLString);
+    // Log the part's XML string to verify the data
+    console.log("Part XML for selected part:", partXMLString);
+
+    // Create the Blob for the part's XML
+    const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
+
+    // Use fflate to create a zip file
+    const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
 
     // Create a Blob URL and trigger the download
     const partBlob = new Blob([zipData], { type: "application/zip" });
@@ -238,6 +244,7 @@ async function downloadSelectedPart() {
     output.innerText = "Error occurred while downloading the part.";
   }
 }
+
 
 
     // Attach analyzeFile function to the "Analyze" button after DOM is loaded
