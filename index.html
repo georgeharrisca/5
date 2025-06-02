@@ -192,16 +192,14 @@
           return;
         }
 
-        // Directly download the XML content of the part (without zipping)
         const partBlob = new Blob([partXMLString], { type: "application/xml" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.xml`;
+        link.download = `${selectedPart.name}_${selectedPart.id}.xml`; // Download XML file directly
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
       } catch (err) {
         console.error("Error while downloading the part:", err);
         output.innerText = "Error occurred while downloading the part.";
