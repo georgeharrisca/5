@@ -46,7 +46,7 @@
   <script>
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
-      { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
+    { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
       // Add more files as needed
     ];
 
@@ -127,10 +127,16 @@
         const partId = match[1];
         const partXML = match[0]; // Full part XML (from <part> to </part>)
 
+        // Log the full part XML to inspect the structure
+        console.log("Full Part XML:", partXML);  // <-- Add logging to inspect the XML
+
         // Updated regex for extracting part name correctly
         const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(partXML);
         const partName = partNameMatch ? partNameMatch[1] : "(no name)";
         
+        // Log the extracted part name to inspect
+        console.log("Extracted Part Name:", partName);  // <-- Log the extracted part name
+
         partInfo.push({ id: partId, name: partName, xml: partXML });
       }
 
@@ -158,17 +164,4 @@
     }
 
     // Populate the dropdown with extracted parts
-    function populatePartSelect(partFiles) {
-      const partSelect = document.getElementById("partSelect");
-      partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
-      partFiles.forEach(part => {
-        const option = document.createElement('option');
-        const partURL = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
-        option.value = partURL;
-        option.textContent = part.name;
-        partSelect.appendChild(option);
-      });
-    }
-  </script>
-</body>
-</html>
+    function populatePa
