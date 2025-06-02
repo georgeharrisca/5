@@ -29,8 +29,8 @@
     <option value="">-- Select an MXL File --</option>
     <!-- Options will be populated dynamically -->
   </select>
+  <button id="analyzeButton">Analyze</button>
   <button onclick="downloadFile()">Download</button>
-  <button onclick="analyzeFile()">Analyze</button>
 
   <!-- Section to display part information -->
   <div id="partInfo"></div>
@@ -110,7 +110,6 @@
 
         const rootfile = containerDoc.querySelector("rootfile");
         const musicXMLPath = rootfile?.getAttribute("full-path");
-
         if (!musicXMLPath || !zip[musicXMLPath]) {
           output.innerText = "Error: .musicxml file not found.";
           return;
@@ -191,6 +190,10 @@
         partSelect.appendChild(option);
       });
     }
+
+    // Attach analyzeFile function to the "Analyze" button after DOM is loaded
+    document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
+
   </script>
 </body>
 </html>
