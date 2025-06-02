@@ -245,6 +245,37 @@ async function downloadSelectedPart() {
   }
 }
 
+// Function to extract part information (names, IDs, and XML content)
+function extractParts(musicXML) {
+  const partInfo = [];
+  const partRegex = /<part id="([^"]+)">([\s\S]*?)<\/part>/g;
+  let match;
+
+  while ((match = partRegex.exec(musicXML)) !== null) {
+    const partId = match[1];
+    const partXML = match[0]; // Full part XML (from <part> to </part>)
+
+    // Extract the part name using a more refined approach
+    const partNameRegex = /<part-name[^>]*>([^<]+)<\/part-name>/i;
+    const partNameMatch = partNameRegex.exec(partXML);
+
+    let partName = "(no name)";
+    if (partNameMatch && partNameMatch[1]) {
+      partName = partNameMatch[1].trim();
+    }
+
+    // Push the part's ID, name, and full XML into the partInfo array
+    partInfo.push({
+      id: partId,
+      name: partName,
+      xml: partXML, // This is the full XML content for the part
+    });
+  }
+
+  return partInfo;
+}
+
+
 
 
     // Attach analyzeFile function to the "Analyze" button after DOM is loaded
