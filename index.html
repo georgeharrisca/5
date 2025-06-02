@@ -126,8 +126,11 @@
       while ((match = partRegex.exec(musicXML)) !== null) {
         const partId = match[1];
         const partXML = match[0]; // Full part XML (from <part> to </part>)
+
+        // Updated regex for extracting part name correctly
         const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(partXML);
         const partName = partNameMatch ? partNameMatch[1] : "(no name)";
+        
         partInfo.push({ id: partId, name: partName, xml: partXML });
       }
 
