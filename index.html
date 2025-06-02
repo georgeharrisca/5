@@ -49,6 +49,7 @@
   <script>
     let partInfo = [];
 
+    // List of MXL files (replace with your actual GitHub URLs)
     const files = [
       { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
     ];
@@ -88,7 +89,6 @@
 
         const containerPath = Object.keys(zip).find(p => {
           console.log("Checking path:", p); // Log each file path inside the zip
-          // Check that p is a string and properly handle paths
           return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
@@ -96,8 +96,6 @@
           output.innerText = "Error: container.xml not found.";
           return;
         }
-
-        console.log("Container path found:", containerPath);
 
         const containerXML = new TextDecoder().decode(zip[containerPath]);
         const parser = new DOMParser();
