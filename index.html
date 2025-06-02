@@ -89,9 +89,14 @@
         // Log the zip contents to check what's inside
         console.log("Zip contents:", Object.keys(zip));
 
-        const containerPath = Object.keys(zip).find(p =>
-          p.toLowerCase().includes('meta-inf') && p.toLowerCase().endswith('container.xml')
-        );
+        // Updated: Ensure `p` is a string and check endsWith properly
+        const containerPath = Object.keys(zip).find(p => {
+          if (typeof p === 'string') {
+            return p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
+          }
+          return false;
+        });
+
         if (!containerPath) {
           output.innerText = "Error: container.xml not found.";
           return;
@@ -140,50 +145,4 @@
         console.log("Full Part XML:", partXML);  // <-- Log the full part XML
 
         // Updated regex for extracting part name correctly
-        const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(partXML);
-        const partName = partNameMatch ? partNameMatch[1] : "(no name)";
-        
-        // Log the extracted part name to inspect
-        console.log("Extracted Part Name:", partName);  // <-- Log the extracted part name
-
-        partInfo.push({ id: partId, name: partName, xml: partXML });
-      }
-
-      return partInfo;
-    }
-
-    // Function to create MXL zip (directly from part XML string)
-    function createMXLZip(partXMLString) {
-      const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
-
-      // Create the zip directly
-      const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
-      return zipData;
-    }
-
-    // Display part information
-    function displayPartInfo(partInfo) {
-      const partInfoContainer = document.getElementById('partInfo');
-      partInfoContainer.innerHTML = '';
-      partInfo.forEach(info => {
-        const paragraph = document.createElement('p');
-        paragraph.textContent = `${info.id}: ${info.name}`;
-        partInfoContainer.appendChild(paragraph);
-      });
-    }
-
-    // Populate the dropdown with extracted parts
-    function populatePartSelect(partFiles) {
-      const partSelect = document.getElementById("partSelect");
-      partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
-      partFiles.forEach(part => {
-        const option = document.createElement('option');
-        const partURL = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
-        option.value = partURL;
-        option.textContent = part.name;
-        partSelect.appendChild(option);
-      });
-    }
-  </script>
-</body>
-</html>
+        const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(part*
