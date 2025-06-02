@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MXL File Download, Analysis, and Part Extraction Tool</title>
   <style>
     body {
@@ -119,7 +119,7 @@
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
         console.log("MusicXML file:", musicXML); // Log the MusicXML file content
 
-        // Extract part data (name and ID) using regex
+        // Extract part data (name and ID) using a direct method
         const partInfo = extractParts(musicXML);
         if (partInfo.length === 0) {
           console.log("No parts found.");
@@ -132,43 +132,22 @@
       }
     }
 
-    // Function to extract part information (names and IDs) using a regex
+    // Function to extract part information (names and IDs) using a direct method
     function extractParts(musicXML) {
       const partInfo = [];
-      const partRegex = /<part id="([^"]+)">([\s\S]*?)<\/part>/g;
-      let match;
+      const parser = new DOMParser();
+      const musicDoc = parser.parseFromString(musicXML, "application/xml");
 
-      while ((match = partRegex.exec(musicXML)) !== null) {
-        const partId = match[1];
-        const partXML = match[0]; // Full part XML (from <part> to </part>)
-
-        // Log the full part XML to inspect the structure
-        console.log("Full Part XML:", partXML);  // <-- Log the full part XML
-
-        // Extract the part name using a more refined approach
-        const partNameRegex = /<part-name[^>]*>([^<]+)<\/part-name>/i;
-        const partNameMatch = partNameRegex.exec(partXML);
-
-        let partName = "(no name)";
-        if (partNameMatch && partNameMatch[1]) {
-          partName = partNameMatch[1].trim();
-        }
-
-        console.log("Extracted Part Name:", partName); // <-- Log the final extracted part name
-
-        partInfo.push({ id: partId, name: partName, xml: partXML });
+      const scoreParts = musicDoc.getElementsByTagName("score-part");
+      for (let i = 0; i < scoreParts.length; i++) {
+        const part = scoreParts[i];
+        const id = part.getAttribute("id");
+        const nameNode = part.getElementsByTagName("part-name")[0];
+        const name = nameNode ? nameNode.textContent : "(no name)";
+        partInfo.push({ id: id, name: name });
       }
 
       return partInfo;
-    }
-
-    // Function to create MXL zip (directly from part XML string)
-    function createMXLZip(partXMLString) {
-      const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
-
-      // Create the zip directly
-      const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
-      return zipData;
     }
 
     // Display part information
@@ -188,8 +167,7 @@
       partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
       partFiles.forEach(part => {
         const option = document.createElement('option');
-        const partURL = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
-        option.value = partURL;
+        option.value = part.id;  // Assuming the part ID is unique for each part
         option.textContent = part.name;
         partSelect.appendChild(option);
       });
