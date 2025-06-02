@@ -87,8 +87,10 @@
         const buffer = await response.arrayBuffer();
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
+        // Ensure the value is a string before calling toLowerCase and endsWith
         const containerPath = Object.keys(zip).find(p => {
           console.log("Checking path:", p); // Log each file path inside the zip
+          // Check if it's a valid string before calling toLowerCase and endsWith
           return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
