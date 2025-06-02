@@ -87,20 +87,20 @@
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
         // Log the zip contents to check what's inside
-        console.log("Zip contents:", Object.keys(zip));
+        console.log("Zip contents:", Object.keys(zip)); // Log all zip contents
 
-        // Updated: Ensure `p` is a string and check endsWith properly
+        // Ensure that we are checking the correct paths and log them
         const containerPath = Object.keys(zip).find(p => {
-          if (typeof p === 'string') {
-            return p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
-          }
-          return false;
+          console.log("Checking path:", p); // Log each file path inside the zip
+          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
         if (!containerPath) {
           output.innerText = "Error: container.xml not found.";
           return;
         }
+
+        console.log("Container path found:", containerPath);
 
         const containerXML = new TextDecoder().decode(zip[containerPath]);
         console.log("Container XML:", containerXML); // Log container XML
@@ -110,13 +110,15 @@
 
         const rootfile = containerDoc.querySelector("rootfile");
         const musicXMLPath = rootfile?.getAttribute("full-path");
+
         if (!musicXMLPath || !zip[musicXMLPath]) {
           output.innerText = "Error: .musicxml file not found.";
           return;
         }
 
+        console.log("Found musicXML path:", musicXMLPath);
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
-        console.log("MusicXML file:", musicXML); // Log the MusicXML file
+        console.log("MusicXML file:", musicXML); // Log the MusicXML file content
 
         // Extract part data (name and ID) using regex
         const partInfo = extractParts(musicXML);
@@ -145,4 +147,50 @@
         console.log("Full Part XML:", partXML);  // <-- Log the full part XML
 
         // Updated regex for extracting part name correctly
-        const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(part*
+        const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(partXML);
+        const partName = partNameMatch ? partNameMatch[1] : "(no name)";
+        
+        // Log the extracted part name to inspect
+        console.log("Extracted Part Name:", partName);  // <-- Log the extracted part name
+
+        partInfo.push({ id: partId, name: partName, xml: partXML });
+      }
+
+      return partInfo;
+    }
+
+    // Function to create MXL zip (directly from part XML string)
+    function createMXLZip(partXMLString) {
+      const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
+
+      // Create the zip directly
+      const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
+      return zipData;
+    }
+
+    // Display part information
+    function displayPartInfo(partInfo) {
+      const partInfoContainer = document.getElementById('partInfo');
+      partInfoContainer.innerHTML = '';
+      partInfo.forEach(info => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = `${info.id}: ${info.name}`;
+        partInfoContainer.appendChild(paragraph);
+      });
+    }
+
+    // Populate the dropdown with extracted parts
+    function populatePartSelect(partFiles) {
+      const partSelect = document.getElementById("partSelect");
+      partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
+      partFiles.forEach(part => {
+        const option = document.createElement('option');
+        const partURL = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
+        option.value = partURL;
+        option.textContent = part.name;
+        partSelect.appendChild(option);
+      });
+    }
+  </script>
+</body>
+</html>
