@@ -30,7 +30,6 @@
     <!-- Options will be populated dynamically -->
   </select>
   <button id="analyzeButton">Analyze</button>
-  <button onclick="downloadFile()">Download</button>
 
   <!-- Section to display part information -->
   <div id="partInfo"></div>
@@ -42,7 +41,8 @@
     <option value="">-- Select a Part --</option>
   </select>
 
-  <!-- Button to download the selected part -->
+  <!-- Buttons for download -->
+  <button id="downloadFileButton">Download Full MXL File</button>
   <button id="downloadPartButton">Download Selected Part</button>
 
   <script src="https://unpkg.com/fflate@0.7.4/umd/index.js"></script>
@@ -62,7 +62,7 @@
       selectElement.appendChild(option);
     });
 
-    // Function to trigger download
+    // Function to trigger full MXL download
     function downloadFile() {
       const selectedFile = selectElement.value;
       if (selectedFile) {
@@ -224,6 +224,9 @@
 
     // Attach analyzeFile function to the "Analyze" button after DOM is loaded
     document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
+
+    // Attach the "Download Full MXL File" button click event
+    document.getElementById("downloadFileButton").addEventListener("click", downloadFile);
 
     // Attach the "Download Selected Part" button click event
     document.getElementById("downloadPartButton").addEventListener("click", downloadSelectedPart);
