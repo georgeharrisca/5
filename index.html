@@ -145,26 +145,18 @@
         // Log the full part XML to inspect the structure
         console.log("Full Part XML:", partXML);  // <-- Log the full part XML
 
-        // Manually extract the part name using a more robust method
-        const partNameStart = partXML.indexOf('<part-name>');
-        const partNameEnd = partXML.indexOf('</part-name>');
+        // Extract the part name using a more refined approach
+        const partNameRegex = /<part-name[^>]*>([^<]+)<\/part-name>/i;
+        const partNameMatch = partNameRegex.exec(partXML);
 
-        // Log the exact content between <part-name> tags
-        const partNameFragment = partXML.slice(partNameStart + 11, partNameEnd);
-        console.log("Part Name Fragment:", partNameFragment); // <-- Log the part name fragment
-
-        // Check if partNameFragment is not empty, else log surrounding part
-        const partName = partNameFragment.trim();
-        if (!partName) {
-          console.log("No part name found in this part, logging full part XML:", partXML);
+        let partName = "(no name)";
+        if (partNameMatch && partNameMatch[1]) {
+          partName = partNameMatch[1].trim();
         }
 
-        // Fallback to "(no name)" if the part name is still empty
-        const finalPartName = partName || "(no name)";
+        console.log("Extracted Part Name:", partName); // <-- Log the final extracted part name
 
-        console.log("Final Extracted Part Name:", finalPartName); // <-- Log the final extracted part name
-
-        partInfo.push({ id: partId, name: finalPartName, xml: partXML });
+        partInfo.push({ id: partId, name: partName, xml: partXML });
       }
 
       return partInfo;
