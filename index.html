@@ -49,7 +49,6 @@
   <script>
     let partInfo = [];
 
-    // List of MXL files (replace with your actual GitHub URLs)
     const files = [
       { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
     ];
@@ -87,10 +86,8 @@
         const buffer = await response.arrayBuffer();
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
-        // Ensure the value is a string before calling toLowerCase and endsWith
         const containerPath = Object.keys(zip).find(p => {
           console.log("Checking path:", p); // Log each file path inside the zip
-          // Check if it's a valid string before calling toLowerCase and endsWith
           return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
@@ -195,18 +192,16 @@
           return;
         }
 
-        const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
-
-        const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
-
-        const partBlob = new Blob([zipData], { type: "application/zip" });
+        // Directly download the XML content of the part (without zipping)
+        const partBlob = new Blob([partXMLString], { type: "application/xml" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;
+        link.download = `${selectedPart.name}_${selectedPart.id}.xml`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
       } catch (err) {
         console.error("Error while downloading the part:", err);
         output.innerText = "Error occurred while downloading the part.";
