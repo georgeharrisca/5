@@ -193,14 +193,14 @@
           return;
         }
 
-        // Create MXL file from XML
+        // Create MXL file from XML content
         const zipData = fflate.zipSync([["part.xml", new Blob([partXMLString], { type: "application/xml" })]]);
         const partBlob = new Blob([zipData], { type: "application/zip" });
 
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // Ensure it's downloaded as MXL
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // Ensure it downloads as .mxl
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
