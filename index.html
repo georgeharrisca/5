@@ -145,12 +145,18 @@
         // Log the full part XML to inspect the structure
         console.log("Full Part XML:", partXML);  // <-- Log the full part XML
 
-        // Updated regex for extracting part name more flexibly
-        const partNameMatch = /<part-name\s*>([\s\S]*?)<\/part-name>/i.exec(partXML);  // Using \s* to allow for extra spaces
-        const partName = partNameMatch ? partNameMatch[1].trim() : "(no name)";
-        
-        // Log the extracted part name to inspect
-        console.log("Extracted Part Name:", partName);  // <-- Log the extracted part name
+        // Manually extract the part name using a more robust method
+        const partNameStart = partXML.indexOf('<part-name>');
+        const partNameEnd = partXML.indexOf('</part-name>');
+
+        if (partNameStart !== -1 && partNameEnd !== -1) {
+          const partName = partXML.slice(partNameStart + 11, partNameEnd).trim(); // Extract part name between <part-name> tags
+          console.log("Manually Extracted Part Name:", partName);
+        } else {
+          console.log("No part name found");
+        }
+
+        const partName = partNameStart !== -1 && partNameEnd !== -1 ? partXML.slice(partNameStart + 11, partNameEnd).trim() : "(no name)";
 
         partInfo.push({ id: partId, name: partName, xml: partXML });
       }
