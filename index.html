@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MXL File Download, Analysis, and Part Extraction Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    select, button {
+      margin: 20px;
+      padding: 10px;
+    }
+    #partInfo {
+      margin-top: 20px;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>Select an MXL File to Download, Analyze, and Extract Parts</h1>
+
+  <!-- Dropdown to select MXL file -->
+  <select id="mxlSelect">
+    <option value="">-- Select an MXL File --</option>
+    <!-- Options will be populated dynamically -->
+  </select>
+  <button onclick="downloadFile()">Download</button>
+  <button onclick="analyzeFile()">Analyze</button>
+
+  <!-- Section to display part information -->
+  <div id="partInfo"></div>
+  <pre id="output">Waiting for file...</pre>
+
+  <!-- Dropdown for part downloads -->
+  <h2>Select a Part to Download</h2>
+  <select id="partSelect">
+    <option value="">-- Select a Part --</option>
+  </select>
+
+  <script src="https://unpkg.com/fflate@0.7.4/umd/index.js"></script>
+  <script>
+    // List of MXL files (replace with your actual GitHub URLs)
+    const files = [
+      { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/346621424a4f6a228688adc71a6b48aac4c37b78/tbm.mxl' },
+      // Add more files as needed
+    ];
+
+    // Populate the select dropdown
+    const selectElement = document.getElementById('mxlSelect');
+    files.forEach(file => {
+      const option = document.createElement('option');
+      option.value = file.url;
+      option.textContent = file.name;
+      selectElement.appendChild(option);
+    });
+
+    // Function to trigger download
+    function downloadFile() {
+      const selectedFile = selectElement.value;
+      if (selectedFile) {
+        window.location.href = selectedFile; // Redirect to the file URL for download
+      } else {
+        alert('Please select a file to download');
+      }
+    }
+
+    // Function to analyze the selected MXL file
+    async function analyzeFile() {
+      const selectedUrl = selectElement.value;
+      if (!selectedUrl) {
+        alert('Please select a file to analyze');
+        return;
+      }
+
+      const output = document.getElementById("output");
+      output.innerText = "Analyzing file...";
+
+      try {
+        const response = await fetch(selectedUrl);
+        const buffer = await response.arrayBuffer();
+        const zip = fflate.unzipSync(new Uint8Array(buffer));
+
+        const containerPath = Object.keys(zip).find(p =>
+          p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml')
+        );
+        if (!containerPath) {
+          output.innerText = "Error: container.xml not found.";
+          return;
+        }
+
+        const containerXML = new TextDecoder().decode(zip[containerPath]);
+        const parser = new DOMParser();
+        const containerDoc = parser.parseFromString(containerXML, "application/xml");
+
+        const rootfile = containerDoc.querySelector("rootfile");
+        const musicXMLPath = rootfile?.getAttribute("full-path");
+        if (!musicXMLPath || !zip[musicXMLPath]) {
+          output.innerText = "Error: .musicxml file not found.";
+          return;
+        }
+
+        const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
+        const musicDoc = parser.parseFromString(musicXML, "application/xml");
+
+        const scoreParts = musicDoc.getElementsByTagName("score-part");
+        output.innerText = "Score Parts:\n";
+        let partInfo = [];
+        let partFiles = [];
+        for (let i = 0; i < scoreParts.length; i++) {
+          const part = scoreParts[i];
+          const id = part.getAttribute("id");
+          const nameNode = part.getElementsByTagName("part-name")[0];
+          const name = nameNode?.textContent || "(no name)";
+          partInfo.push(`${id}: ${name}`);
+
+          // Create a new MXL file for each part
+          const partXML = createPartXML(musicDoc, id);
+          const partFileName = `${name.replace(/\s+/g, '_')}_${id}.mxl`;
+          const partZip = createMXLZip(partXML);
+          partFiles.push({ name: partFileName, zip: partZip });
+        }
+        
+        displayPartInfo(partInfo);
+        populatePartSelect(partFiles);
+      } catch (err) {
+        output.innerText = "An error occurred:\n" + err.message;
+        console.error(err);
+      }
+    }
+
+    // Function to create part-specific MusicXML
+    function createPartXML(musicDoc, partId) {
+      const newDoc = musicDoc.cloneNode(true);
+      const partList = newDoc.getElementsByTagName("part");
+      for (let i = 0; i < partList.length; i++) {
+        const part = partList[i];
+        if (part.getAttribute("id") !== partId) {
+          part.remove();
+        }
+      }
+      return newDoc;
+    }
+
+    // Function to create MXL zip
+    function createMXLZip(xmlDoc) {
+      const xmlString = new XMLSerializer().serializeToString(xmlDoc);
+      const xmlBlob = new Blob([xmlString], { type: "application/xml" });
+      const zip = new fflate.ZipWriter();
+      zip.add("part.xml", xmlBlob);
+      return zip.toUint8Array();
+    }
+
+    // Display part information
+    function displayPartInfo(partInfo) {
+      const partInfoContainer = document.getElementById('partInfo');
+      partInfoContainer.innerHTML = '';
+      partInfo.forEach(info => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = info;
+        partInfoContainer.appendChild(paragraph);
+      });
+    }
+
+    // Populate the dropdown with extracted parts
+    function populatePartSelect(partFiles) {
+      const partSelect = document.getElementById("partSelect");
+      partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
+      partFiles.forEach(part => {
+        const option = document.createElement('option');
+        option.value = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
+        option.textContent = part.name;
+        partSelect.appendChild(option);
+      });
+    }
+  </script>
+</body>
+</html>
