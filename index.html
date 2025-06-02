@@ -88,7 +88,7 @@
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
         const containerPath = Object.keys(zip).find(p => {
-          console.log("Checking path:", p); // Log each file path inside the zip
+          console.log("Checking path:", p);
           return typeof p === 'string' && p.toLowerCase && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
@@ -201,7 +201,7 @@
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // This ensures the part is downloaded in MXL format
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // Ensure that it is downloaded in MXL format
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -214,7 +214,6 @@
     document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
     document.getElementById("downloadFileButton").addEventListener("click", downloadFile);
     document.getElementById("downloadPartButton").addEventListener("click", downloadSelectedPart);
-
   </script>
 </body>
 </html>
