@@ -149,7 +149,7 @@
         const part = scoreParts[i];
         const id = part.getAttribute("id");
         const nameNode = part.getElementsByTagName("part-name")[0];
-        const name = nameNode ? nameNode.textContent : "(no name)";
+        const name = nameNode ? nameNode.textContent : "(no name)"; // Default to "(no name)" if part name is not found
         
         // Extract the full XML content for this part
         const partXML = part.outerHTML; // Get the full <part> element and its content
