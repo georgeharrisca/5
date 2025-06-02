@@ -90,7 +90,7 @@
         console.log("Zip contents:", Object.keys(zip));
 
         const containerPath = Object.keys(zip).find(p =>
-          p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml')
+          p.toLowerCase().includes('meta-inf') && p.toLowerCase().endswith('container.xml')
         );
         if (!containerPath) {
           output.innerText = "Error: container.xml not found.";
