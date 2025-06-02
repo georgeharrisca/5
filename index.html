@@ -146,7 +146,7 @@
       partInfoContainer.innerHTML = '';
       partInfo.forEach(info => {
         const paragraph = document.createElement('p');
-        paragraph.textContent = `${info.id}: ${info.name}`;
+        paragraph.textContent = ${info.id}: ${info.name};
         partInfoContainer.appendChild(paragraph);
       });
     }
@@ -192,14 +192,11 @@
           return;
         }
 
-        // Create MXL file from XML content (zip the XML file into a MXL)
-        const zipData = fflate.zipSync([["part.xml", new Blob([partXMLString], { type: "application/xml" })]]);
-        const partBlob = new Blob([zipData], { type: "application/zip" });
-
+        const partBlob = new Blob([partXMLString], { type: "application/xml" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`; // Ensure it downloads as .mxl
+        link.download = ${selectedPart.name}_${selectedPart.id}.xml; // Download XML file directly
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
