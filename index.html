@@ -48,7 +48,7 @@
   <script src="https://unpkg.com/fflate@0.7.4/umd/index.js"></script>
   <script>
     // Global variable to store part information
-    let partInfo = [];
+    let partInfo = []; // Initialize as an empty array
 
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
@@ -200,6 +200,13 @@
       output.innerText = "Downloading part...";
 
       try {
+        // Check if partInfo is valid
+        if (!Array.isArray(partInfo) || partInfo.length === 0) {
+          console.error("partInfo is not valid or empty");
+          alert("No part information found.");
+          return;
+        }
+
         const selectedPart = partInfo.find(part => part.id === selectedPartId); // Now works because partInfo is global
         if (!selectedPart) {
           alert("Selected part not found.");
