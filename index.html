@@ -22,7 +22,7 @@
   </style>
 </head>
 <body>
-  <h1>Select an MXL File to Download, Analyze, and Extract Parts 5</h1>
+  <h1>Select an MXL File to Download, Analyze, and Extract Parts</h1>
 
   <!-- Dropdown to select MXL file -->
   <select id="mxlSelect">
@@ -118,10 +118,10 @@
           const name = nameNode?.textContent || "(no name)";
           partInfo.push(`${id}: ${name}`);
 
-          // Create a new MXL file for each part
-          const partXML = createPartXML(musicDoc, id);
+          // Extract the part as a simple string (no deep recursion)
+          const partXMLString = extractPartXML(musicXML, id);
           const partFileName = `${name.replace(/\s+/g, '_')}_${id}.mxl`;
-          const partZip = createMXLZip(partXML);
+          const partZip = createMXLZip(partXMLString);
           partFiles.push({ name: partFileName, zip: partZip });
         }
 
@@ -133,23 +133,19 @@
       }
     }
 
-    // Function to create part-specific MusicXML
-    function createPartXML(musicDoc, partId) {
-      // Directly filter out the part using DOM manipulation (no cloning)
-      const partNode = musicDoc.querySelector(`part[id="${partId}"]`);
-      if (partNode) {
-        // Create a new document and append the selected part
-        const newDoc = document.implementation.createDocument('', '', null);
-        newDoc.appendChild(partNode.cloneNode(true)); // Append only the part needed
-        return newDoc;
-      }
-      return musicDoc; // Return the original document if part not found
+    // Function to extract a part-specific MusicXML as a string (no deep recursion)
+    function extractPartXML(musicXML, partId) {
+      const partStart = `<part id="${partId}">`;
+      const partEnd = `</part>`;
+      const startIdx = musicXML.indexOf(partStart);
+      const endIdx = musicXML.indexOf(partEnd, startIdx) + partEnd.length;
+
+      return musicXML.substring(startIdx, endIdx);
     }
 
-    // Function to create MXL zip
-    function createMXLZip(xmlDoc) {
-      const xmlString = new XMLSerializer().serializeToString(xmlDoc);
-      const xmlBlob = new Blob([xmlString], { type: "application/xml" });
+    // Function to create MXL zip (directly from part XML string)
+    function createMXLZip(partXMLString) {
+      const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
 
       // Create the zip directly
       const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
