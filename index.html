@@ -49,7 +49,6 @@
   <script>
     let partInfo = [];
 
-    // List of MXL files (replace with your actual GitHub URLs)
     const files = [
       { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
     ];
@@ -88,8 +87,8 @@
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
         const containerPath = Object.keys(zip).find(p => {
-          console.log("Checking path:", p);
-          return typeof p === 'string' && p.toLowerCase && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
+          console.log("Checking path:", p); // Log each file path inside the zip
+          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
         });
 
         if (!containerPath) {
@@ -135,7 +134,7 @@
         const nameNode = part.getElementsByTagName("part-name")[0];
         const name = nameNode ? nameNode.textContent : "(no name)";
         
-        const partXML = part.outerHTML; // Use the outerHTML for the full part XML
+        const partXML = part.outerHTML;
         partInfo.push({ id, name, xml: partXML });
       }
 
@@ -193,14 +192,14 @@
           return;
         }
 
-        // Create MXL file from XML content
+        // Create MXL file from XML content (zip the XML file into a MXL)
         const zipData = fflate.zipSync([["part.xml", new Blob([partXMLString], { type: "application/xml" })]]);
         const partBlob = new Blob([zipData], { type: "application/zip" });
 
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // Ensure it downloads as .mxl
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`; // Ensure it downloads as .mxl
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
