@@ -145,8 +145,8 @@
         // Log the full part XML to inspect the structure
         console.log("Full Part XML:", partXML);  // <-- Log the full part XML
 
-        // Updated regex for extracting part name correctly
-        const partNameMatch = /<part-name\s*>(.*?)<\/part-name>/i.exec(partXML);  // Using \s* to allow for extra spaces
+        // Updated regex for extracting part name more flexibly
+        const partNameMatch = /<part-name\s*>([\s\S]*?)<\/part-name>/i.exec(partXML);  // Using \s* to allow for extra spaces
         const partName = partNameMatch ? partNameMatch[1].trim() : "(no name)";
         
         // Log the extracted part name to inspect
