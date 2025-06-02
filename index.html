@@ -87,7 +87,11 @@
         const buffer = await response.arrayBuffer();
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
-        const containerPath = Object.keys(zip).find(p => p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml'));
+        const containerPath = Object.keys(zip).find(p => {
+          console.log("Checking path:", p); // Log each file path inside the zip
+          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
+        });
+
         if (!containerPath) {
           output.innerText = "Error: container.xml not found.";
           return;
@@ -191,10 +195,8 @@
 
         const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
 
-        // Create the zip using fflate
         const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
 
-        // Create a Blob URL and trigger the download
         const partBlob = new Blob([zipData], { type: "application/zip" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
