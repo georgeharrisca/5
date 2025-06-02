@@ -94,6 +94,7 @@
         }
 
         const containerXML = new TextDecoder().decode(zip[containerPath]);
+
         const parser = new DOMParser();
         const containerDoc = parser.parseFromString(containerXML, "application/xml");
 
@@ -106,7 +107,7 @@
 
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
 
-        // Directly extract parts and their names
+        // Extract part data (name and ID) using regex
         const partInfo = extractParts(musicXML);
         displayPartInfo(partInfo);
         populatePartSelect(partInfo);
@@ -116,29 +117,20 @@
       }
     }
 
-    // Function to extract part information (names and IDs) from the XML string
+    // Function to extract part information (names and IDs) using a regex
     function extractParts(musicXML) {
       const partInfo = [];
-      const partStartTag = "<part";
-      const partEndTag = "</part>";
-      
-      let startIdx = 0;
-      while (true) {
-        startIdx = musicXML.indexOf(partStartTag, startIdx);
-        if (startIdx === -1) break; // No more parts
+      const partRegex = /<part id="([^"]+)">([\s\S]*?)<\/part>/g;
+      let match;
 
-        const endIdx = musicXML.indexOf(partEndTag, startIdx) + partEndTag.length;
-        const partXML = musicXML.substring(startIdx, endIdx);
-
-        const idMatch = partXML.match(/id="([^"]+)"/);
-        const nameMatch = partXML.match(/<part-name>(.*?)<\/part-name>/);
-        const partName = nameMatch ? nameMatch[1] : "(no name)";
-        const partId = idMatch ? idMatch[1] : "unknown";
-
+      while ((match = partRegex.exec(musicXML)) !== null) {
+        const partId = match[1];
+        const partXML = match[0]; // Full part XML (from <part> to </part>)
+        const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(partXML);
+        const partName = partNameMatch ? partNameMatch[1] : "(no name)";
         partInfo.push({ id: partId, name: partName, xml: partXML });
-        
-        startIdx = endIdx;
       }
+
       return partInfo;
     }
 
