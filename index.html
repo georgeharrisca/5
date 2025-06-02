@@ -135,15 +135,15 @@
 
     // Function to create part-specific MusicXML
     function createPartXML(musicDoc, partId) {
-      const newDoc = musicDoc.cloneNode(true);
-      const partList = newDoc.getElementsByTagName("part");
-      for (let i = 0; i < partList.length; i++) {
-        const part = partList[i];
-        if (part.getAttribute("id") !== partId) {
-          part.remove();
-        }
+      // Directly filter out the part using DOM manipulation (no cloning)
+      const partNode = musicDoc.querySelector(`part[id="${partId}"]`);
+      if (partNode) {
+        // Create a new document and append the selected part
+        const newDoc = document.implementation.createDocument('', '', null);
+        newDoc.appendChild(partNode.cloneNode(true)); // Append only the part needed
+        return newDoc;
       }
-      return newDoc;
+      return musicDoc; // Return the original document if part not found
     }
 
     // Function to create MXL zip
@@ -151,7 +151,7 @@
       const xmlString = new XMLSerializer().serializeToString(xmlDoc);
       const xmlBlob = new Blob([xmlString], { type: "application/xml" });
 
-      // Use fflate to create the zip, directly returning the data
+      // Create the zip directly
       const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
       return zipData;
     }
