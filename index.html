@@ -134,7 +134,7 @@
         const id = part.getAttribute("id");
         const nameNode = part.getElementsByTagName("part-name")[0];
         const name = nameNode ? nameNode.textContent : "(no name)";
-
+        
         const partXML = part.outerHTML; // Use the outerHTML for the full part XML
         partInfo.push({ id, name, xml: partXML });
       }
@@ -193,15 +193,14 @@
           return;
         }
 
-        const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
-
-        const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
-
+        // Create MXL file from XML
+        const zipData = fflate.zipSync([["part.xml", new Blob([partXMLString], { type: "application/xml" })]]);
         const partBlob = new Blob([zipData], { type: "application/zip" });
+
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // Ensure that it is downloaded in MXL format
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;  // Ensure it's downloaded as MXL
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
