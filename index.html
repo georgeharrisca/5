@@ -42,6 +42,9 @@
     <option value="">-- Select a Part --</option>
   </select>
 
+  <!-- Button to download the selected part -->
+  <button id="downloadPartButton">Download Selected Part</button>
+
   <script src="https://unpkg.com/fflate@0.7.4/umd/index.js"></script>
   <script>
     // List of MXL files (replace with your actual GitHub URLs)
@@ -150,6 +153,15 @@
       return partInfo;
     }
 
+    // Function to create MXL zip (directly from part XML string)
+    function createMXLZip(partXMLString) {
+      const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
+
+      // Create the zip directly
+      const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
+      return zipData;
+    }
+
     // Display part information
     function displayPartInfo(partInfo) {
       const partInfoContainer = document.getElementById('partInfo');
@@ -173,8 +185,48 @@
       });
     }
 
+    // Function to download the selected part
+    async function downloadSelectedPart() {
+      const selectedPartId = document.getElementById("partSelect").value;
+      if (!selectedPartId) {
+        alert("Please select a part to download.");
+        return;
+      }
+
+      const output = document.getElementById("output");
+      output.innerText = "Downloading part...";
+
+      try {
+        const selectedPart = partInfo.find(part => part.id === selectedPartId);
+        if (!selectedPart) {
+          alert("Selected part not found.");
+          return;
+        }
+
+        // Create a part-specific MXL file from the part's XML
+        const partXMLString = selectedPart.xml;
+        const zipData = createMXLZip(partXMLString);
+
+        // Create a Blob URL and trigger the download
+        const partBlob = new Blob([zipData], { type: "application/zip" });
+        const url = URL.createObjectURL(partBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error("Error while downloading the part:", err);
+        output.innerText = "Error occurred while downloading the part.";
+      }
+    }
+
     // Attach analyzeFile function to the "Analyze" button after DOM is loaded
     document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
+
+    // Attach the "Download Selected Part" button click event
+    document.getElementById("downloadPartButton").addEventListener("click", downloadSelectedPart);
 
   </script>
 </body>
