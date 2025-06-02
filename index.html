@@ -105,42 +105,41 @@
         }
 
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
-        const musicDoc = parser.parseFromString(musicXML, "application/xml");
 
-        const scoreParts = musicDoc.getElementsByTagName("score-part");
-        output.innerText = "Score Parts:\n";
-        let partInfo = [];
-        let partFiles = [];
-        for (let i = 0; i < scoreParts.length; i++) {
-          const part = scoreParts[i];
-          const id = part.getAttribute("id");
-          const nameNode = part.getElementsByTagName("part-name")[0];
-          const name = nameNode?.textContent || "(no name)";
-          partInfo.push(`${id}: ${name}`);
-
-          // Extract the part as a simple string (no deep recursion)
-          const partXMLString = extractPartXML(musicXML, id);
-          const partFileName = `${name.replace(/\s+/g, '_')}_${id}.mxl`;
-          const partZip = createMXLZip(partXMLString);
-          partFiles.push({ name: partFileName, zip: partZip });
-        }
-
+        // Directly extract parts and their names
+        const partInfo = extractParts(musicXML);
         displayPartInfo(partInfo);
-        populatePartSelect(partFiles);
+        populatePartSelect(partInfo);
       } catch (err) {
         output.innerText = "An error occurred:\n" + err.message;
         console.error(err);
       }
     }
 
-    // Function to extract a part-specific MusicXML as a string (no deep recursion)
-    function extractPartXML(musicXML, partId) {
-      const partStart = `<part id="${partId}">`;
-      const partEnd = `</part>`;
-      const startIdx = musicXML.indexOf(partStart);
-      const endIdx = musicXML.indexOf(partEnd, startIdx) + partEnd.length;
+    // Function to extract part information (names and IDs) from the XML string
+    function extractParts(musicXML) {
+      const partInfo = [];
+      const partStartTag = "<part";
+      const partEndTag = "</part>";
+      
+      let startIdx = 0;
+      while (true) {
+        startIdx = musicXML.indexOf(partStartTag, startIdx);
+        if (startIdx === -1) break; // No more parts
 
-      return musicXML.substring(startIdx, endIdx);
+        const endIdx = musicXML.indexOf(partEndTag, startIdx) + partEndTag.length;
+        const partXML = musicXML.substring(startIdx, endIdx);
+
+        const idMatch = partXML.match(/id="([^"]+)"/);
+        const nameMatch = partXML.match(/<part-name>(.*?)<\/part-name>/);
+        const partName = nameMatch ? nameMatch[1] : "(no name)";
+        const partId = idMatch ? idMatch[1] : "unknown";
+
+        partInfo.push({ id: partId, name: partName, xml: partXML });
+        
+        startIdx = endIdx;
+      }
+      return partInfo;
     }
 
     // Function to create MXL zip (directly from part XML string)
@@ -158,7 +157,7 @@
       partInfoContainer.innerHTML = '';
       partInfo.forEach(info => {
         const paragraph = document.createElement('p');
-        paragraph.textContent = info;
+        paragraph.textContent = `${info.id}: ${info.name}`;
         partInfoContainer.appendChild(paragraph);
       });
     }
