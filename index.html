@@ -188,49 +188,57 @@
       });
     }
 
-    // Function to download the selected part
-    async function downloadSelectedPart() {
-      const selectedPartId = document.getElementById("partSelect").value;
-      if (!selectedPartId) {
-        alert("Please select a part to download.");
-        return;
-      }
+  // Function to download the selected part
+async function downloadSelectedPart() {
+  const selectedPartId = document.getElementById("partSelect").value;
+  if (!selectedPartId) {
+    alert("Please select a part to download.");
+    return;
+  }
 
-      const output = document.getElementById("output");
-      output.innerText = "Downloading part...";
+  const output = document.getElementById("output");
+  output.innerText = "Downloading part...";
 
-      try {
-        // Check if partInfo is valid
-        if (!Array.isArray(partInfo) || partInfo.length === 0) {
-          console.error("partInfo is not valid or empty");
-          alert("No part information found.");
-          return;
-        }
-
-        const selectedPart = partInfo.find(part => part.id === selectedPartId); // Now works because partInfo is global
-        if (!selectedPart) {
-          alert("Selected part not found.");
-          return;
-        }
-
-        // Create a part-specific MXL file from the part's XML
-        const partXMLString = selectedPart.xml;
-        const zipData = createMXLZip(partXMLString);
-
-        // Create a Blob URL and trigger the download
-        const partBlob = new Blob([zipData], { type: "application/zip" });
-        const url = URL.createObjectURL(partBlob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (err) {
-        console.error("Error while downloading the part:", err);
-        output.innerText = "Error occurred while downloading the part.";
-      }
+  try {
+    // Check if partInfo is valid
+    if (!Array.isArray(partInfo) || partInfo.length === 0) {
+      console.error("partInfo is not valid or empty");
+      alert("No part information found.");
+      return;
     }
+
+    const selectedPart = partInfo.find(part => part.id === selectedPartId); // Now works because partInfo is global
+    if (!selectedPart) {
+      alert("Selected part not found.");
+      return;
+    }
+
+    // Ensure part XML is valid before creating the zip
+    const partXMLString = selectedPart.xml;
+    if (!partXMLString) {
+      console.error("No part XML found for the selected part");
+      alert("No XML content for the selected part.");
+      return;
+    }
+
+    // Create a MXL zip from the part's XML string
+    const zipData = createMXLZip(partXMLString);
+
+    // Create a Blob URL and trigger the download
+    const partBlob = new Blob([zipData], { type: "application/zip" });
+    const url = URL.createObjectURL(partBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${selectedPart.name}_${selectedPart.id}.mxl`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error("Error while downloading the part:", err);
+    output.innerText = "Error occurred while downloading the part.";
+  }
+}
+
 
     // Attach analyzeFile function to the "Analyze" button after DOM is loaded
     document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
