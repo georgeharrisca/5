@@ -47,16 +47,13 @@
 
   <script src="https://unpkg.com/fflate@0.7.4/umd/index.js"></script>
   <script>
-    // Global variable to store part information
-    let partInfo = []; // Initialize as an empty array
+    let partInfo = [];
 
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
       { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
-      // Add more files as needed
     ];
 
-    // Populate the select dropdown
     const selectElement = document.getElementById('mxlSelect');
     files.forEach(file => {
       const option = document.createElement('option');
@@ -65,17 +62,15 @@
       selectElement.appendChild(option);
     });
 
-    // Function to trigger full MXL download
     function downloadFile() {
       const selectedFile = selectElement.value;
       if (selectedFile) {
-        window.location.href = selectedFile; // Redirect to the file URL for download
+        window.location.href = selectedFile;
       } else {
         alert('Please select a file to download');
       }
     }
 
-    // Function to analyze the selected MXL file
     async function analyzeFile() {
       const selectedUrl = selectElement.value;
       if (!selectedUrl) {
@@ -92,25 +87,13 @@
         const buffer = await response.arrayBuffer();
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
-        // Log the zip contents to check what's inside
-        console.log("Zip contents:", Object.keys(zip)); // Log all zip contents
-
-        // Ensure that we are checking the correct paths and log them
-        const containerPath = Object.keys(zip).find(p => {
-          console.log("Checking path:", p); // Log each file path inside the zip
-          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endswith('container.xml');
-        });
-
+        const containerPath = Object.keys(zip).find(p => p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml'));
         if (!containerPath) {
           output.innerText = "Error: container.xml not found.";
           return;
         }
 
-        console.log("Container path found:", containerPath);
-
         const containerXML = new TextDecoder().decode(zip[containerPath]);
-        console.log("Container XML:", containerXML); // Log container XML
-
         const parser = new DOMParser();
         const containerDoc = parser.parseFromString(containerXML, "application/xml");
 
@@ -123,10 +106,8 @@
 
         console.log("Found musicXML path:", musicXMLPath);
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
-        console.log("MusicXML file:", musicXML); // Log the MusicXML file content
 
-        // Extract part data (name and ID) using a direct method
-        partInfo = extractParts(musicXML); // Store partInfo globally
+        partInfo = extractParts(musicXML);
         if (partInfo.length === 0) {
           console.log("No parts found.");
         }
@@ -138,7 +119,6 @@
       }
     }
 
-    // Function to extract part information (names, IDs, and full XML content)
     function extractParts(musicXML) {
       const partInfo = [];
       const parser = new DOMParser();
@@ -149,27 +129,15 @@
         const part = scoreParts[i];
         const id = part.getAttribute("id");
         const nameNode = part.getElementsByTagName("part-name")[0];
-        const name = nameNode ? nameNode.textContent : "(no name)"; // Default to "(no name)" if part name is not found
+        const name = nameNode ? nameNode.textContent : "(no name)";
         
-        // Extract the full XML content for this part
-        const partXML = part.outerHTML; // Get the full <part> element and its content
-
-        partInfo.push({ id: id, name: name, xml: partXML });
+        const partXML = part.outerHTML; // Use the outerHTML for the full part XML
+        partInfo.push({ id, name, xml: partXML });
       }
 
       return partInfo;
     }
 
-    // Function to create MXL zip (directly from part XML string)
-    function createMXLZip(partXMLString) {
-      const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
-
-      // Create the zip directly
-      const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
-      return zipData;
-    }
-
-    // Display part information
     function displayPartInfo(partInfo) {
       const partInfoContainer = document.getElementById('partInfo');
       partInfoContainer.innerHTML = '';
@@ -180,19 +148,17 @@
       });
     }
 
-    // Populate the dropdown with extracted parts
     function populatePartSelect(partFiles) {
       const partSelect = document.getElementById("partSelect");
-      partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
+      partSelect.innerHTML = '<option value="">-- Select a Part --</option>';
       partFiles.forEach(part => {
         const option = document.createElement('option');
-        option.value = part.id;  // Assuming the part ID is unique for each part
+        option.value = part.id;
         option.textContent = part.name;
         partSelect.appendChild(option);
       });
     }
 
-    // Function to download the selected part
     async function downloadSelectedPart() {
       const selectedPartId = document.getElementById("partSelect").value;
       if (!selectedPartId) {
@@ -204,20 +170,18 @@
       output.innerText = "Downloading part...";
 
       try {
-        // Check if partInfo is valid
         if (!Array.isArray(partInfo) || partInfo.length === 0) {
-          console.error("partInfo is not valid or empty");
+          console.error("partInfo is invalid or empty");
           alert("No part information found.");
           return;
         }
 
-        const selectedPart = partInfo.find(part => part.id === selectedPartId); // Now works because partInfo is global
+        const selectedPart = partInfo.find(part => part.id === selectedPartId);
         if (!selectedPart) {
           alert("Selected part not found.");
           return;
         }
 
-        // Ensure part XML is valid before creating the zip
         const partXMLString = selectedPart.xml;
         if (!partXMLString) {
           console.error("No part XML found for the selected part");
@@ -225,13 +189,9 @@
           return;
         }
 
-        // Log the part's XML string to verify the data
-        console.log("Part XML for selected part:", partXMLString);
-
-        // Create the Blob for the part's XML
         const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
 
-        // Use fflate to create a zip file
+        // Create the zip using fflate
         const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
 
         // Create a Blob URL and trigger the download
@@ -249,15 +209,9 @@
       }
     }
 
-    // Attach analyzeFile function to the "Analyze" button after DOM is loaded
     document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
-
-    // Attach the "Download Full MXL File" button click event
     document.getElementById("downloadFileButton").addEventListener("click", downloadFile);
-
-    // Attach the "Download Selected Part" button click event
     document.getElementById("downloadPartButton").addEventListener("click", downloadSelectedPart);
-
   </script>
 </body>
 </html>
