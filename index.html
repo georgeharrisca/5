@@ -87,8 +87,8 @@
         const zip = fflate.unzipSync(new Uint8Array(buffer));
 
         const containerPath = Object.keys(zip).find(p => {
-          console.log("Checking path:", p); // Log each file path inside the zip
-          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml');
+          console.log("Checking path:", p); 
+          return typeof p === 'string' && p.toLowerCase().includes('meta-inf') && p.toLowerCase().endswith('container.xml');
         });
 
         if (!containerPath) {
@@ -192,11 +192,18 @@
           return;
         }
 
-        const partBlob = new Blob([partXMLString], { type: "application/xml" });
+        // Create the Blob for the part's XML
+        const xmlBlob = new Blob([partXMLString], { type: "application/xml" });
+
+        // Use fflate to create a zip file (MXL format)
+        const zipData = fflate.zipSync([["part.xml", xmlBlob]]);
+
+        // Create a Blob URL and trigger the download as an .mxl file
+        const partBlob = new Blob([zipData], { type: "application/zip" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${selectedPart.name}_${selectedPart.id}.xml`; // Download XML file directly
+        link.download = `${selectedPart.name}_${selectedPart.id}.mxl`; // Download in MXL format
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
