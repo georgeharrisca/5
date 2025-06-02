@@ -150,16 +150,9 @@
     function createMXLZip(xmlDoc) {
       const xmlString = new XMLSerializer().serializeToString(xmlDoc);
       const xmlBlob = new Blob([xmlString], { type: "application/xml" });
-      const zipData = new Uint8Array();
-      
-      // Using fflate to compress the MXL file
-      fflate.zip([["part.xml", xmlBlob]], (err, zipBuffer) => {
-        if (err) {
-          console.error("Error creating zip file:", err);
-        }
-      });
 
-      return zipData;
+      // Directly return the zipped data from fflate
+      return fflate.zipSync([["part.xml", xmlBlob]]);
     }
 
     // Display part information
