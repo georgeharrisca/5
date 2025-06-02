@@ -81,9 +81,13 @@
       output.innerText = "Analyzing file...";
 
       try {
+        console.log("Fetching MXL file from:", selectedUrl);
         const response = await fetch(selectedUrl);
         const buffer = await response.arrayBuffer();
         const zip = fflate.unzipSync(new Uint8Array(buffer));
+
+        // Log the zip contents to check what's inside
+        console.log("Zip contents:", Object.keys(zip));
 
         const containerPath = Object.keys(zip).find(p =>
           p.toLowerCase().includes('meta-inf') && p.toLowerCase().endsWith('container.xml')
@@ -94,6 +98,7 @@
         }
 
         const containerXML = new TextDecoder().decode(zip[containerPath]);
+        console.log("Container XML:", containerXML); // Log container XML
 
         const parser = new DOMParser();
         const containerDoc = parser.parseFromString(containerXML, "application/xml");
@@ -106,12 +111,13 @@
         }
 
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
-
-        // Log the entire XML to inspect
-        console.log("Full MusicXML:", musicXML);  // Log the entire XML content
+        console.log("MusicXML file:", musicXML); // Log the MusicXML file
 
         // Extract part data (name and ID) using regex
         const partInfo = extractParts(musicXML);
+        if (partInfo.length === 0) {
+          console.log("No parts found.");
+        }
         displayPartInfo(partInfo);
         populatePartSelect(partInfo);
       } catch (err) {
@@ -131,7 +137,7 @@
         const partXML = match[0]; // Full part XML (from <part> to </part>)
 
         // Log the full part XML to inspect the structure
-        console.log("Full Part XML:", partXML);  // <-- Add logging to inspect the XML
+        console.log("Full Part XML:", partXML);  // <-- Log the full part XML
 
         // Updated regex for extracting part name correctly
         const partNameMatch = /<part-name>(.*?)<\/part-name>/.exec(partXML);
