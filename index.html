@@ -46,7 +46,7 @@
   <script>
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
-    { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
+      { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
       // Add more files as needed
     ];
 
@@ -107,6 +107,9 @@
 
         const musicXML = new TextDecoder().decode(zip[musicXMLPath]);
 
+        // Log the entire XML to inspect
+        console.log("Full MusicXML:", musicXML);  // Log the entire XML content
+
         // Extract part data (name and ID) using regex
         const partInfo = extractParts(musicXML);
         displayPartInfo(partInfo);
@@ -164,4 +167,17 @@
     }
 
     // Populate the dropdown with extracted parts
-    function populatePa
+    function populatePartSelect(partFiles) {
+      const partSelect = document.getElementById("partSelect");
+      partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
+      partFiles.forEach(part => {
+        const option = document.createElement('option');
+        const partURL = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
+        option.value = partURL;
+        option.textContent = part.name;
+        partSelect.appendChild(option);
+      });
+    }
+  </script>
+</body>
+</html>
