@@ -46,7 +46,7 @@
   <script>
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
-      { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/346621424a4f6a228688adc71a6b48aac4c37b78/tbm.mxl' },
+     { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/346621424a4f6a228688adc71a6b48aac4c37b78/tbm.mxl' },
       // Add more files as needed
     ];
 
@@ -124,7 +124,7 @@
           const partZip = createMXLZip(partXML);
           partFiles.push({ name: partFileName, zip: partZip });
         }
-        
+
         displayPartInfo(partInfo);
         populatePartSelect(partFiles);
       } catch (err) {
@@ -150,9 +150,16 @@
     function createMXLZip(xmlDoc) {
       const xmlString = new XMLSerializer().serializeToString(xmlDoc);
       const xmlBlob = new Blob([xmlString], { type: "application/xml" });
-      const zip = new fflate.ZipWriter();
-      zip.add("part.xml", xmlBlob);
-      return zip.toUint8Array();
+      const zipData = new Uint8Array();
+      
+      // Using fflate to compress the MXL file
+      fflate.zip([["part.xml", xmlBlob]], (err, zipBuffer) => {
+        if (err) {
+          console.error("Error creating zip file:", err);
+        }
+      });
+
+      return zipData;
     }
 
     // Display part information
@@ -172,7 +179,8 @@
       partSelect.innerHTML = '<option value="">-- Select a Part --</option>'; // Clear previous options
       partFiles.forEach(part => {
         const option = document.createElement('option');
-        option.value = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
+        const partURL = URL.createObjectURL(new Blob([part.zip], { type: "application/zip" }));
+        option.value = partURL;
         option.textContent = part.name;
         partSelect.appendChild(option);
       });
