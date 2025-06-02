@@ -47,6 +47,9 @@
 
   <script src="https://unpkg.com/fflate@0.7.4/umd/index.js"></script>
   <script>
+    // Global variable to store part information
+    let partInfo = [];
+
     // List of MXL files (replace with your actual GitHub URLs)
     const files = [
       { name: 'tbm.mxl', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.mxl' },
@@ -123,7 +126,7 @@
         console.log("MusicXML file:", musicXML); // Log the MusicXML file content
 
         // Extract part data (name and ID) using a direct method
-        const partInfo = extractParts(musicXML);
+        partInfo = extractParts(musicXML); // Store partInfo globally
         if (partInfo.length === 0) {
           console.log("No parts found.");
         }
@@ -197,7 +200,7 @@
       output.innerText = "Downloading part...";
 
       try {
-        const selectedPart = partInfo.find(part => part.id === selectedPartId);
+        const selectedPart = partInfo.find(part => part.id === selectedPartId); // Now works because partInfo is global
         if (!selectedPart) {
           alert("Selected part not found.");
           return;
